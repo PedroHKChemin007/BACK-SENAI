@@ -1,8 +1,7 @@
 const express = require('express')
 const sqlite3 = require('sqlite3').verbose()
-const cors = require('corps')
+const cors = require('cors')
 const bcrypt = require('bcrypt')
-const { log } = require('console')
 
 const app = express()
 const PORT = 3000
@@ -21,6 +20,19 @@ db.run(`CREATE TABLE IF NOT EXISTS usuarios (
     senha TEXT
     )
 `)
+
+
+
+
+app.post('/', async (req, res) => {
+    res.json({
+        'teste': 'ok'
+    })
+})
+
+
+
+
 //Cadastro usuario
 app.post('/usuarios', async (req, res) =>{
 
@@ -28,7 +40,7 @@ app.post('/usuarios', async (req, res) =>{
 
     let nome = req.body.nome
     let email = req.body.email
-    let senha = req.body.semha
+    let senha = req.body.senha
 
     let senhahash = await bcrypt.hash(senha, 10)
     console.log(senhahash);
@@ -38,11 +50,48 @@ db.run(`INSERT INTO usuario (nome, email, senha)
 VALUES (?, ?, ?)`,
     [nome, email, senhahash],
     res.json({
-        id: this.lasID,
+        id: this.lastID,
         nome,
         email
         })
     )
+})
+
+//selecionar um usuario
+app.get('usuarios/:id', (req,res) => {
+    let idUsuario = req.paramas.id;
+
+    db.get(`SELECT id, nome, email FROM usuarios 
+    WHERE id = ?`,
+    [idUsuario], (err, row) => {
+        if (row) {
+            res.json(row)
+        } else{
+            res.status(404).json({
+                'message' : 'Usuario não encontrado.'
+            })
+        }
+    })
+})
+
+//deletar usuarios
+app.delete('usuarios/:id', (req, res) =>{
+    let idUsuario = req.params.id
+
+    db.get(`DELETE FROM usuarios WHERE id = ?`,
+    [idUsuario], function(err, result) {
+        if (result) {
+            res.json({
+            'masage' : 'Usuario deletado'
+        })
+        } else{
+            res.status(404).json({
+                'masage' : 'Usuario não encontrado'
+            })
+        }
+        
+    })
+    
 })
 
 //listar todos os usuarios
