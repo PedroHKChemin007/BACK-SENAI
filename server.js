@@ -94,6 +94,26 @@ app.delete('usuarios/:id', (req, res) =>{
     
 })
 
+//editar usuario
+
+app.put('/usuarios/:id', async (req, res) =>{
+    let idUsuario =req.params.id
+
+    let nome = req.body.nome
+    let email = req.body.email
+    let senha = req.body.senha
+
+    let senhahash = await bcrypt.hash(senha, 10)
+
+    db.run(`UPDATE usuarios SET nome = ?, email = ?, senha = ?
+    WHERE id = ?`, [nome,semail,senhahash,idUsuario],
+    function() {
+        res.json({
+            'message' : 'usuarios atualizados com sucesso'
+        })
+    })
+})
+
 //listar todos os usuarios
 
 app.get("/usuarios",(req, res) =>{
